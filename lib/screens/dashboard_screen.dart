@@ -11,25 +11,143 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   int _selectedIndex = 0;
+  
+  // Controles de estado independentes para ITs e Processos
+  String _selectedITCard = 'total'; 
+  String _selectedProcessCard = 'total'; 
 
-  // Função para deslogar do Supabase
+  // ============================================================================
+  // PALETA DE CORES GLOBAL (DESIGN SYSTEM PIXEL PERFECT)
+  // ============================================================================
+  static const backgroundColor = Color(0xFF0C0E14);
+  static const surfaceColor = Color(0xFF141720);
+  static const surface2Color = Color(0xFF1C2030);
+  static const borderColor = Color(0xFF252A3A);
+
+  static const orange = Color(0xFFF97316);
+  static const blue = Color(0xFF6366F1);
+  static const green = Color(0xFF22C55E);
+  static const yellow = Color(0xFFEAB308);
+  static const red = Color(0xFFEF4444);
+  static const purple = Color(0xFFA855F7);
+  static const textSecondaryColor = Color(0xFF8892A4);
+
+  // ============================================================================
+  // DADOS DOS PAINÉIS DE ITs
+  // ============================================================================
+  final Map<String, Map<String, dynamic>> detailPanelsIT = {
+    'total': {
+      'title': 'Detalhamento por Setor — Total de ITs',
+      'sub': '12 ITs em 5 setores',
+      'bars': [
+        {'label': 'Operacional', 'val': 6, 'pct': '50%', 'color': purple},
+        {'label': 'Depto Pessoal', 'val': 2, 'pct': '17%', 'color': green},
+        {'label': 'RH', 'val': 2, 'pct': '17%', 'color': textSecondaryColor},
+        {'label': 'SESMT', 'val': 1, 'pct': '8%', 'color': const Color(0xFF06B6D4)},
+        {'label': 'Compras', 'val': 1, 'pct': '8%', 'color': yellow},
+      ],
+    },
+    'publicadas': {
+      'title': 'Detalhamento por Setor — ITs Publicadas',
+      'sub': '6 ITs em 3 setores',
+      'bars': [
+        {'label': 'Operacional', 'val': 4, 'pct': '67%', 'color': purple},
+        {'label': 'SESMT', 'val': 1, 'pct': '17%', 'color': const Color(0xFF06B6D4)},
+        {'label': 'Depto Pessoal', 'val': 1, 'pct': '17%', 'color': green},
+      ],
+    },
+    'aprovacao': {
+      'title': 'Fila de Aprovação por Etapa',
+      'sub': 'Onde estão paradas as 2 ITs pendentes?',
+      'bars': [
+        {'label': 'Auditoria', 'val': 2, 'pct': '100%', 'color': yellow},
+      ],
+    },
+    'descontinuadas': {
+      'title': 'Detalhamento por Setor — Descontinuadas',
+      'sub': '1 IT em 1 setor',
+      'bars': [
+        {'label': 'Operacional', 'val': 1, 'pct': '100%', 'color': purple},
+      ],
+    },
+    'intersetoriais': {
+      'title': 'Detalhamento por Setor — ITs Intersetoriais',
+      'sub': '4 ITs em 3 setores',
+      'bars': [
+        {'label': 'Operacional', 'val': 2, 'pct': '50%', 'color': purple},
+        {'label': 'Depto Pessoal', 'val': 1, 'pct': '25%', 'color': green},
+        {'label': 'RH', 'val': 1, 'pct': '25%', 'color': textSecondaryColor},
+      ],
+    },
+    'financeiro': {
+      'title': 'Detalhamento — Envolvimento Financeiro',
+      'sub': '3 ITs em 2 setores',
+      'bars': [
+        {'label': 'Operacional', 'val': 2, 'pct': '67%', 'color': purple},
+        {'label': 'Compras', 'val': 1, 'pct': '33%', 'color': yellow},
+      ],
+    },
+    'criticidade': {
+      'title': 'Detalhamento por Criticidade (ITs)',
+      'sub': 'Distribuição de ITs por nível de risco',
+      'bars': [
+        {'label': 'Alta', 'val': 6, 'pct': '50%', 'color': red},
+        {'label': 'Média', 'val': 3, 'pct': '25%', 'color': yellow},
+        {'label': 'Baixa', 'val': 3, 'pct': '25%', 'color': green},
+      ],
+    },
+  };
+
+  // ============================================================================
+  // DADOS DOS PAINÉIS DE PROCESSOS
+  // ============================================================================
+  final Map<String, Map<String, dynamic>> detailPanelsProcess = {
+    'total': {
+      'title': 'Detalhamento por Setor — Total de Processos',
+      'sub': '12 Processos mapeados',
+      'bars': [
+        {'label': 'Operacional', 'val': 6, 'pct': '50%', 'color': purple},
+        {'label': 'T.I', 'val': 3, 'pct': '25%', 'color': const Color(0xFF8B5CF6)},
+        {'label': 'Financeiro', 'val': 3, 'pct': '25%', 'color': green},
+      ],
+    },
+    'publicadas': { 'title': 'Processos Publicados', 'sub': 'Nenhum processo publicado', 'bars': [] },
+    'aprovacao': { 'title': 'Em Aprovação', 'sub': 'Nenhum processo pendente', 'bars': [] },
+    'descontinuadas': { 'title': 'Descontinuados', 'sub': 'Nenhum processo descontinuado', 'bars': [] },
+    'intersetoriais': {
+      'title': 'Processos Intersetoriais',
+      'sub': '11 Processos em 2 setores',
+      'bars': [
+        {'label': 'Operacional', 'val': 6, 'pct': '54%', 'color': purple},
+        {'label': 'Financeiro', 'val': 5, 'pct': '46%', 'color': green},
+      ],
+    },
+    'financeiro': {
+      'title': 'Processos Financeiros',
+      'sub': '7 Processos em 1 setor',
+      'bars': [
+        {'label': 'Financeiro', 'val': 7, 'pct': '100%', 'color': green},
+      ],
+    },
+    'criticidade': {
+      'title': 'Detalhamento por Criticidade (Processos)',
+      'sub': 'Distribuição de Processos por nível de risco',
+      'bars': [
+        {'label': 'Alta', 'val': 11, 'pct': '92%', 'color': red},
+        {'label': 'Média', 'val': 1, 'pct': '8%', 'color': yellow},
+        {'label': 'Baixa', 'val': 0, 'pct': '0%', 'color': green},
+      ],
+    },
+  };
+
   Future<void> _fazerLogout() async {
     await Supabase.instance.client.auth.signOut();
-    
-    // Volta para a tela de login apagando o histórico
     if (mounted) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => const LoginScreen()),
       );
     }
   }
-
-  // Cores do Tema
-  static const backgroundColor = Color(0xFF080A0F);
-  static const surfaceColor = Color(0xFF111318);
-  static const orangeThemeColor = Color(0xFFF97316);
-  static const textSecondaryColor = Color(0xFF94A3B8);
-  static const borderColor = Color(0xFF2A2D3E);
 
   @override
   Widget build(BuildContext context) {
@@ -44,35 +162,35 @@ class _DashboardScreenState extends State<DashboardScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // --- HEADER SUPERIOR ---
                 _buildHeader(userEmail),
+                const SizedBox(height: 32),
                 
+                // --- SEÇÃO 1: DASHBOARD DE ITs ---
+                _buildSectionTitle('Dashboard de ITs', 'Visão geral das Instruções de Trabalho', 'Nova IT'),
                 const SizedBox(height: 24),
-                
-                // --- TÍTULO E BOTÃO NOVA IT ---
-                _buildTitleSection(),
-                
-                const SizedBox(height: 20),
-                
-                // --- CAMPO DE BUSCA ---
-                _buildSearchField(),
-                
+                _buildMetricsGrid(isIT: true),
                 const SizedBox(height: 24),
+                _buildDetailPanel(detailPanelsIT, _selectedITCard),
                 
-                // --- GRID DE MÉTRICAS ---
-                _buildMetricsGrid(),
-                
+                const SizedBox(height: 40),
+                const Divider(color: borderColor, thickness: 1),
+                const SizedBox(height: 40),
+
+                // --- SEÇÃO 2: GERÊNCIA DE PROCESSOS ---
+                _buildSectionTitle('Gerência de Processos', 'Visão geral dos Processos do Sistema', 'Novo Processo'),
                 const SizedBox(height: 24),
-                
-                // --- CRITICIDADE DAS ITs ---
-                _buildCriticalitySection(),
-                
+                _buildMetricsGrid(isIT: false),
                 const SizedBox(height: 24),
-                
-                // --- GERÊNCIA DE PROCESSOS ---
-                _buildProcessesSection(),
-                
-                const SizedBox(height: 80), // Espaço para o bottom nav
+                _buildDetailPanel(detailPanelsProcess, _selectedProcessCard),
+
+                const SizedBox(height: 40),
+                const Divider(color: borderColor, thickness: 1),
+                const SizedBox(height: 40),
+
+                // --- SEÇÃO 3: SUGESTÕES DE VERIFICAÇÃO (NOVO) ---
+                _buildSugestoesVerificacao(),
+
+                const SizedBox(height: 100),
               ],
             ),
           ),
@@ -82,95 +200,56 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  // Header com logo, notificação e avatar
   Widget _buildHeader(String userEmail) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        // Logo AIONS System
+        // Colocamos o Expanded aqui para o texto nunca vazar da tela!
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Olá, ${userEmail.isNotEmpty ? userEmail[0].toUpperCase() + userEmail.substring(1) : ''}!',
+                style: const TextStyle(fontFamily: 'Syne', color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+                overflow: TextOverflow.ellipsis, // Bota "..." se o nome for gigante
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                'Acompanhe o status dos processos', 
+                style: TextStyle(fontFamily: 'DMSans', color: textSecondaryColor, fontSize: 13),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 8), // Espaço seguro
         Row(
           children: [
-            Container(
-              width: 8,
-              height: 8,
-              decoration: const BoxDecoration(
-                color: orangeThemeColor,
-                shape: BoxShape.circle,
+            GestureDetector(
+              onTap: () {},
+              child: const Stack(
+                children: [
+                  Icon(Icons.notifications_outlined, color: Colors.white, size: 28),
+                  Positioned(
+                    right: 0,
+                    top: 0,
+                    child: CircleAvatar(radius: 6, backgroundColor: orange),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(width: 8),
-            const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'AIONS System',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  'v8.2.5 Gerenciamento Eficiente',
-                  style: TextStyle(
-                    color: textSecondaryColor,
-                    fontSize: 10,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-        
-        // Notificação e Avatar
-        Row(
-          children: [
-            Stack(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: surfaceColor,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(
-                    Icons.notifications_outlined,
-                    color: Colors.white,
-                    size: 20,
-                  ),
-                ),
-                Positioned(
-                  right: 6,
-                  top: 6,
-                  child: Container(
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                      color: orangeThemeColor,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 16),
             GestureDetector(
               onTap: _fazerLogout,
               child: Container(
                 width: 40,
                 height: 40,
-                decoration: BoxDecoration(
-                  color: orangeThemeColor,
-                  borderRadius: BorderRadius.circular(8),
-                ),
+                decoration: BoxDecoration(color: orange, borderRadius: BorderRadius.circular(12)),
                 child: Center(
                   child: Text(
                     userEmail.isNotEmpty ? userEmail[0].toUpperCase() : 'U',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: const TextStyle(fontFamily: 'Syne', color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
@@ -181,109 +260,300 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  // Título "Dashboard de ITs" com botão "+ Nova IT"
-  Widget _buildTitleSection() {
+  Widget _buildSectionTitle(String title, String subtitle, String btnLabel) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const Text(
-          'Dashboard de ITs',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          decoration: BoxDecoration(
-            color: const Color(0xFF1E3A8A),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: const Row(
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(Icons.add, color: Colors.white, size: 16),
-              SizedBox(width: 4),
-              Text(
-                'Nova IT',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+              Text(title, style: const TextStyle(fontFamily: 'Syne', color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 4),
+              Text(subtitle, style: const TextStyle(fontFamily: 'DMSans', color: textSecondaryColor, fontSize: 12)),
             ],
           ),
         ),
-      ],
-    );
-  }
-
-  // Campo de Busca
-  Widget _buildSearchField() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: surfaceColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: borderColor, width: 1),
-      ),
-      child: const Row(
-        children: [
-          Icon(Icons.search, color: textSecondaryColor, size: 20),
-          SizedBox(width: 12),
-          Text(
-            'Buscar ITs...',
-            style: TextStyle(
-              color: textSecondaryColor,
-              fontSize: 14,
+        // Botão principal estilizado fielmente ao Figma
+        ElevatedButton.icon(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: blue, // Usando a variável da paleta
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            elevation: 0, // Removendo sombra padrão do Material
+          ),
+          onPressed: () {},
+          icon: const Icon(Icons.add, size: 16, color: Colors.white),
+          label: Text(
+            btnLabel,
+            style: const TextStyle(
+              fontFamily: 'Syne',
+              fontSize: 13,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  // Grid de Métricas (4 cards)
-  Widget _buildMetricsGrid() {
-    return GridView.count(
-      crossAxisCount: 2,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisSpacing: 16,
-      mainAxisSpacing: 16,
-      childAspectRatio: 1.2,
-      children: const [
-        MetricCard(
-          title: 'Total de ITs',
-          value: '12',
-          icon: Icons.description_outlined,
-          iconColor: Color(0xFF3B82F6),
-        ),
-        MetricCard(
-          title: 'Publicadas',
-          value: '6',
-          icon: Icons.check_circle_outline,
-          iconColor: Color(0xFF22C55E),
-        ),
-        MetricCard(
-          title: 'Em Aprovação',
-          value: '1',
-          icon: Icons.access_time,
-          iconColor: Color(0xFFEAB308),
-        ),
-        MetricCard(
-          title: 'Descontinuadas',
-          value: '1',
-          icon: Icons.cancel_outlined,
-          iconColor: Color(0xFFEF4444),
         ),
       ],
     );
   }
 
-  // Seção de Criticidade das ITs
-  Widget _buildCriticalitySection() {
+  Widget _buildMetricsGrid({required bool isIT}) {
+    String selectedKey = isIT ? _selectedITCard : _selectedProcessCard;
+    
+    void onSelect(String key) {
+      setState(() {
+        if (isIT) { _selectedITCard = key; } else { _selectedProcessCard = key; }
+      });
+    }
+
+    String valTotal = isIT ? '12' : '12';
+    String valPub   = isIT ? '6' : '0';
+    String valAprov = isIT ? '2' : '0';
+    String valDesc  = isIT ? '1' : '0';
+    String valInter = isIT ? '4' : '11';
+    String valFin   = isIT ? '3' : '7';
+    int cAlta = isIT ? 6 : 11;
+    int cMed  = isIT ? 3 : 1;
+    int cBaixa = isIT ? 3 : 0;
+
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(child: _buildMetricCard('Total', valTotal, Icons.description_outlined, blue, 'total', selectedKey, onSelect)),
+            const SizedBox(width: 12),
+            Expanded(child: _buildMetricCard('Publicadas', valPub, Icons.check_circle_outline, green, 'publicadas', selectedKey, onSelect)),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(child: _buildMetricCard('Em Aprovação', valAprov, Icons.access_time, yellow, 'aprovacao', selectedKey, onSelect)),
+            const SizedBox(width: 12),
+            Expanded(child: _buildMetricCard('Descontinuadas', valDesc, Icons.cancel_outlined, red, 'descontinuadas', selectedKey, onSelect)),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(child: _buildMetricCard('Intersetoriais', valInter, Icons.shuffle, purple, 'intersetoriais', selectedKey, onSelect)),
+            const SizedBox(width: 12),
+            Expanded(child: _buildMetricCard('Financeiro', valFin, Icons.attach_money, green, 'financeiro', selectedKey, onSelect)),
+          ],
+        ),
+        const SizedBox(height: 12),
+        _buildCriticidadeCard(cAlta, cMed, cBaixa, 'criticidade', selectedKey, onSelect),
+      ],
+    );
+  }
+
+  // --- CARD EXATO COMO DEFINIDO NO FIGMA ---
+  Widget _buildMetricCard(
+    String title,
+    String value,
+    IconData icon,
+    Color iconColor,
+    String cardKey,
+    String selectedKey,
+    Function(String) onSelect,
+  ) {
+    final isSelected = selectedKey == cardKey;
+
+    return GestureDetector(
+      onTap: () => onSelect(cardKey),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        transform: Matrix4.identity()..scale(isSelected ? 1.02 : 1.0),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: surfaceColor,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: isSelected ? iconColor : borderColor,
+            width: isSelected ? 1.5 : 1,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: iconColor.withOpacity(0.25),
+                    blurRadius: 12,
+                    spreadRadius: 1,
+                  )
+                ]
+              : [],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              height: 32,
+              width: 32,
+              decoration: BoxDecoration(
+                color: iconColor.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(icon, color: iconColor, size: 18),
+            ),
+            const SizedBox(height: 14),
+            Text(
+              value,
+              style: const TextStyle(
+                fontFamily: 'Syne',
+                fontSize: 28,
+                fontWeight: FontWeight.bold, 
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              title,
+              style: const TextStyle(
+                fontFamily: 'DMSans',
+                fontSize: 11,
+                color: textSecondaryColor,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // --- CARD DE CRITICIDADE COM ANIMAÇÃO ---
+  Widget _buildCriticidadeCard(int alta, int med, int baixa, String cardKey, String selectedKey, Function(String) onSelect) {
+    bool isSelected = selectedKey == cardKey;
+    Color iconColor = orange;
+
+    return GestureDetector(
+      onTap: () => onSelect(cardKey),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        transform: Matrix4.identity()..scale(isSelected ? 1.02 : 1.0),
+        padding: const EdgeInsets.all(14.0),
+        decoration: BoxDecoration(
+          color: surfaceColor,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: isSelected ? iconColor : borderColor, width: isSelected ? 1.5 : 1),
+          boxShadow: isSelected
+              ? [ BoxShadow(color: iconColor.withOpacity(0.25), blurRadius: 12, spreadRadius: 1) ]
+              : [],
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Criticidade',
+                    style: TextStyle(fontFamily: 'DMSans', color: isSelected ? Colors.white : textSecondaryColor, fontSize: 11, fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 12),
+                  _buildMiniBar('Alta', alta, red),
+                  _buildMiniBar('Méd', med, yellow),
+                  _buildMiniBar('Baixa', baixa, green),
+                ],
+              ),
+            ),
+            const SizedBox(width: 16),
+            Container(
+              height: 32,
+              width: 32,
+              decoration: BoxDecoration(color: iconColor.withOpacity(0.15), borderRadius: BorderRadius.circular(8)),
+              child: Icon(Icons.warning_amber_rounded, color: iconColor, size: 18),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // --- BARRAS DE CRITICIDADE ANIMADAS EXATAS ---
+  Widget _buildMiniBar(String label, int value, Color color) {
+    final double percentage = (value / 12).clamp(0.0, 1.0);
+
+    return Column(
+      children: [
+        Row(
+          children: [
+            SizedBox(
+              width: 35,
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontFamily: 'DMSans',
+                  color: color,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            Expanded(
+              child: TweenAnimationBuilder<double>(
+                duration: const Duration(milliseconds: 800),
+                curve: Curves.easeOutCubic,
+                tween: Tween(begin: 0, end: percentage),
+                builder: (context, valueAnim, _) {
+                  return Stack(
+                    children: [
+                      Container(
+                        height: 6,
+                        decoration: BoxDecoration(
+                          color: surface2Color,
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                      ),
+                      FractionallySizedBox(
+                        widthFactor: valueAnim,
+                        child: Container(
+                          height: 6,
+                          decoration: BoxDecoration(
+                            color: color,
+                            borderRadius: BorderRadius.circular(999),
+                            boxShadow: [
+                              BoxShadow(
+                                color: color.withOpacity(0.4),
+                                blurRadius: 10,
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              value.toString(),
+              style: const TextStyle(
+                fontFamily: 'Syne',
+                color: Colors.white,
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+      ],
+    );
+  }
+
+  // --- PAINEL DINÂMICO (COM ANIMAÇÕES) ---
+  Widget _buildDetailPanel(Map<String, Map<String, dynamic>> sourceMap, String selectedKey) {
+    final panelData = sourceMap[selectedKey]!;
+    final List<dynamic> bars = panelData['bars'];
+    
+    int total = bars.fold(0, (sum, bar) => sum + (bar['val'] as int));
+    if (total == 0) total = 1;
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -296,162 +566,151 @@ class _DashboardScreenState extends State<DashboardScreen> {
         children: [
           Row(
             children: [
-              const Icon(
-                Icons.warning_amber_rounded,
-                color: orangeThemeColor,
-                size: 20,
-              ),
+              const Icon(Icons.bar_chart, color: blue, size: 20),
               const SizedBox(width: 8),
-              const Text(
-                'Criticidade das ITs',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+              Expanded(
+                child: Text(
+                  panelData['title'],
+                  style: const TextStyle(fontFamily: 'Syne', color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 4),
+          Text(panelData['sub'], style: const TextStyle(fontFamily: 'DMSans', color: textSecondaryColor, fontSize: 12)),
+          const SizedBox(height: 24),
           
-          // Barra Alta (Vermelho)
-          _buildCriticalityBar('Alta', 6, const Color(0xFFEF4444)),
-          const SizedBox(height: 12),
-          
-          // Barra Méd (Amarelo)
-          _buildCriticalityBar('Méd', 3, const Color(0xFFEAB308)),
-          const SizedBox(height: 12),
-          
-          // Barra Bx (Verde)
-          _buildCriticalityBar('Bx', 3, const Color(0xFF22C55E)),
+          if (bars.isEmpty)
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 20),
+                child: Text('Nenhum dado encontrado para este filtro.', style: TextStyle(fontFamily: 'DMSans', color: textSecondaryColor, fontStyle: FontStyle.italic)),
+              ),
+            )
+          else
+            ...bars.map((bar) {
+              final double fraction = (bar['val'] as int) / total;
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: _buildSectorBar(bar['label'], bar['val'], bar['pct'], bar['color'], fraction),
+              );
+            }).toList(),
         ],
       ),
     );
   }
 
-  // Barra individual de criticidade
-  Widget _buildCriticalityBar(String label, int value, Color color) {
-    // Calcula a largura proporcional (total = 12 ITs)
-    final double fraction = value / 12.0;
-    
-    return Row(
-      children: [
-        // Label
-        SizedBox(
-          width: 40,
-          child: Text(
-            label,
-            style: const TextStyle(
-              color: textSecondaryColor,
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-        
-        // Barra de progresso
-        Expanded(
-          child: Stack(
-            children: [
-              // Background da barra
-              Container(
-                height: 24,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1E293B),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-              ),
-              // Barra preenchida
-              FractionallySizedBox(
-                widthFactor: fraction,
-                child: Container(
-                  height: 24,
-                  decoration: BoxDecoration(
-                    color: color,
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        
-        const SizedBox(width: 12),
-        
-        // Valor
-        SizedBox(
-          width: 20,
-          child: Text(
-            value.toString(),
-            textAlign: TextAlign.right,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  // Seção de Gerência de Processos
-  Widget _buildProcessesSection() {
+  Widget _buildSectorBar(String label, int value, String pct, Color color, double fraction) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              'Gerência de Processos',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
+            Text(label, style: const TextStyle(fontFamily: 'DMSans', color: Color(0xFFE2E8F0), fontSize: 13, fontWeight: FontWeight.w600)),
+            Row(
+              children: [
+                Text(pct, style: const TextStyle(fontFamily: 'DMSans', color: textSecondaryColor, fontSize: 12)),
+                const SizedBox(width: 8),
+                Text(value.toString(), style: const TextStyle(fontFamily: 'Syne', color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold)),
+              ],
             ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: const Color(0xFF1E3A8A),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Row(
-                children: [
-                  Icon(Icons.add, color: Colors.white, size: 14),
-                  SizedBox(width: 4),
-                  Text(
-                    'Processo',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                    ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        TweenAnimationBuilder<double>(
+          duration: const Duration(milliseconds: 800),
+          curve: Curves.easeOutCubic,
+          tween: Tween(begin: 0, end: fraction.clamp(0.0, 1.0)),
+          builder: (context, valueAnim, _) {
+            return Stack(
+              children: [
+                Container(height: 8, decoration: BoxDecoration(color: surface2Color, borderRadius: BorderRadius.circular(4))),
+                FractionallySizedBox(
+                  widthFactor: valueAnim,
+                  child: Container(
+                    height: 8, 
+                    decoration: BoxDecoration(
+                      color: color, 
+                      borderRadius: BorderRadius.circular(4),
+                      boxShadow: [ BoxShadow(color: color.withOpacity(0.3), blurRadius: 6) ]
+                    )
                   ),
-                ],
+                ),
+              ],
+            );
+          }
+        ),
+      ],
+    );
+  }
+
+  // --- SUGESTÕES DE VERIFICAÇÃO (MANTENDO O DESIGN SYSTEM E IMAGEM) ---
+  Widget _buildSugestoesVerificacao() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Row(
+          children: [
+            Icon(Icons.error_outline, color: red, size: 24),
+            SizedBox(width: 8),
+            Text(
+              'Sugestões de Verificação',
+              style: TextStyle(
+                fontFamily: 'Syne',
+                color: red,
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ],
         ),
+        const SizedBox(height: 4),
+        const Text(
+          'ITs que não recebem atualização há mais de 6 meses, agrupadas por setor.',
+          style: TextStyle(
+            fontFamily: 'DMSans',
+            color: textSecondaryColor,
+            fontSize: 12,
+          ),
+        ),
         const SizedBox(height: 16),
-        
-        // Placeholder para a área de processos
         Container(
-          height: 100,
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
           decoration: BoxDecoration(
-            color: surfaceColor,
-            borderRadius: BorderRadius.circular(12),
+            color: surfaceColor.withOpacity(0.5),
+            borderRadius: BorderRadius.circular(14),
             border: Border.all(color: borderColor, width: 1),
           ),
-          child: const Center(
-            child: Text(
-              'Área de processos',
-              style: TextStyle(
-                color: textSecondaryColor,
-                fontSize: 14,
+          child: Column(
+            children: [
+              Icon(
+                Icons.check_circle_outline,
+                color: green.withOpacity(0.5),
+                size: 48,
               ),
-            ),
+              const SizedBox(height: 12),
+              const Text(
+                'Tudo em dia!',
+                style: TextStyle(
+                  fontFamily: 'Syne',
+                  color: textSecondaryColor,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                'Nenhuma IT encontrada que precise de verificação por falta de atualização.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: 'DMSans',
+                  color: textSecondaryColor,
+                  fontSize: 12,
+                ),
+              ),
+            ],
           ),
         ),
       ],
@@ -461,11 +720,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
   // Bottom Navigation Bar
   Widget _buildBottomNavigationBar() {
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: surfaceColor,
-        border: Border(
-          top: BorderSide(color: borderColor, width: 1),
-        ),
+        border: Border(top: BorderSide(color: borderColor, width: 1)),
       ),
       child: SafeArea(
         child: Padding(
@@ -485,112 +742,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  // Item individual do bottom navigation
   Widget _buildNavItem(IconData icon, String label, int index) {
     final isSelected = _selectedIndex == index;
-    
     return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedIndex = index;
-        });
-      },
+      onTap: () => setState(() => _selectedIndex = index),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            icon,
-            color: isSelected ? orangeThemeColor : textSecondaryColor,
-            size: 24,
-          ),
+          Icon(icon, color: isSelected ? orange : textSecondaryColor, size: 24),
           const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              color: isSelected ? orangeThemeColor : textSecondaryColor,
-              fontSize: 11,
-              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-            ),
-          ),
+          Text(label, style: TextStyle(fontFamily: 'DMSans', color: isSelected ? orange : textSecondaryColor, fontSize: 11, fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal)),
           if (isSelected)
-            Container(
-              margin: const EdgeInsets.only(top: 4),
-              width: 4,
-              height: 4,
-              decoration: const BoxDecoration(
-                color: orangeThemeColor,
-                shape: BoxShape.circle,
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-// --------------------------------------------------------------------------
-// COMPONENTE DOS CARDS DE MÉTRICA
-// --------------------------------------------------------------------------
-class MetricCard extends StatelessWidget {
-  final String title;
-  final String value;
-  final IconData icon;
-  final Color iconColor;
-
-  const MetricCard({
-    super.key,
-    required this.title,
-    required this.value,
-    required this.icon,
-    required this.iconColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: const Color(0xFF111318),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFF2A2D3E), width: 1),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: iconColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(icon, color: iconColor, size: 20),
-              ),
-            ],
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                value,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                title,
-                style: const TextStyle(
-                  color: Color(0xFF94A3B8),
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          ),
+            Container(margin: const EdgeInsets.only(top: 4), width: 4, height: 4, decoration: const BoxDecoration(color: orange, shape: BoxShape.circle)),
         ],
       ),
     );
